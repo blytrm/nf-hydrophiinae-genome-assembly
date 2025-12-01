@@ -1,0 +1,2 @@
+sample_id,original_genome,hifi_reads,hic_1,hic_2
+hmajor,input_data/sample.fasta,input_data/hifi_reads.fastq.gz,input_data/sample_hic_1.fastq.gz,input_data/sample_hic_2.fastq.gz
