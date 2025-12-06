@@ -1,0 +1,11 @@
+parameters:
+  - set: default
+    desc: Default parameters from Hifiasm
+  - set: lowQ50
+    desc: Low quality threshold
+  - set: lowQ50_no-post-join
+    desc: Expected to be preferred (from previous tests)
+  - set: post-join
+    desc: post-joining
+  - set: post-join_lowQ50
+    desc: Post-joining & low quality threshold
