@@ -1,1 +1,1 @@
-# nextflow-pipelines
+# Hydrophiinae Genome Assembly NextFlow Pipeline
