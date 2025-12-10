@@ -14,10 +14,12 @@ params.hifiasm = 'conf/params_hifiasm.yaml'
 include { BUILD_MERYL_DB } from './modules/local/build_meryl_db.nf'
 include { ASSESS_ORIGINAL_GENOME_QC } from './modules/local/assess_original_qc.nf'
 include { DE_NOVO_ASSEMBLY } from './modules/local/de_novo_assembly.nf'
-// hi-c scaffolding
-// hi-c interaction contact mapping
-// polish
-    // ? repeat masking
+// assessment + selection
+include { HI_C_SCAFFOLDING } from './modules/local/hi_c_scaffolding.nf'
+// assessment + selection
+
+// polish + manual curation + repeat masking > what else?
+
 // final assembly assessment
     // ? repeat annotation
     // ? v2r rough quantification
@@ -52,6 +54,13 @@ workflow {
     de_novo_input_ch = samples_ch.map { tuple(it[0], it[2]) } // sample_id & hifi_reads
         .combine(hifiasm_params_ch) // id , hifi reads , params for each
     de_novo_ch = DE_NOVO_ASSEMBLY(de_novo_input_ch) 
+
+    // Hi-C Scaffolding
+    // add yaml
+    // hi-c_params_ch
+    hi_c_scaffolding_input_ch = de_novo_ch
+        .join(samples_ch.map { tuple(it[0], it[3], it[4]) }) // sample_id. hi-c_1, hi-c_2
+    hi_c_scaffolding_ch = HI_C_SCAFFOLDING(hi_c_scaffolding_input_ch)
 
 }
 

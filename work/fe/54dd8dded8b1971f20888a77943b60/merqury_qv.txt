@@ -1,1 +1,0 @@
-Merqury - QV: 45.2 | Completeness: 98.97% | k-mer completeness: 98.8%

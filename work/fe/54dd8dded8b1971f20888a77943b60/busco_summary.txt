@@ -1,1 +1,0 @@
-BUSCO - Complete: 99.22% (D:0.47%) | Fragmented: 0.31% | Missing: 0.47%
