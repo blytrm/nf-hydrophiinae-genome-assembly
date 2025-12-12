@@ -1,11 +1,16 @@
+# conf/params_hifiasm.yaml
 parameters:
-  - set: default
-    desc: Default parameters from Hifiasm
-  - set: lowQ50
-    desc: Low quality threshold
-  - set: lowQ50_no-post-join
-    desc: Expected to be preferred (from previous tests)
-  - set: post-join
-    desc: post-joining
-  - set: post-join_lowQ50
-    desc: Post-joining & low quality threshold
+  # Individual parameter flags
+  post_join:
+    - name: "with-post-join"
+      flag: ""                    # Default is to include post-join
+    - name: "no-post-join"
+      flag: "--no-post-join"
+  
+  quality_threshold:
+    - name: "default-quality"
+      flag: ""                    # Default quality threshold
+    - name: "lowQ50"
+      flag: "--lowQ 50"
+
+  # Add more parameter categories

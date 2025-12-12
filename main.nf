@@ -14,7 +14,6 @@ params.hifiasm = 'conf/params_hifiasm.yaml'
 include { BUILD_MERYL_DB } from './modules/local/build_meryl_db.nf'
 include { ASSESS_ORIGINAL_GENOME_QC } from './modules/local/assess_original_qc.nf'
 include { DE_NOVO_ASSEMBLY } from './modules/local/de_novo_assembly.nf'
-// assessment + selection
 include { HI_C_SCAFFOLDING } from './modules/local/hi_c_scaffolding.nf'
 // assessment + selection
 
@@ -24,6 +23,31 @@ include { HI_C_SCAFFOLDING } from './modules/local/hi_c_scaffolding.nf'
     // ? repeat annotation
     // ? v2r rough quantification
     // ? gene annotation
+
+// Function to generate parameter combinations
+def hifiasmParamComb(yaml) {
+    def paramGroups = yaml.parameters
+    def combinations = []
+    // Get all parameter categories
+    def categories = paramGroups.keySet() as List
+    def generateComb
+    generateComb = { index, current ->
+        if (index >= categories.size()) {
+            def paramSet = current.collect { it.name }.join('_')
+            def args = current.collect { it.flag }.findAll { it != "" }.join(' ')
+            combinations << [set: paramSet, args: args]
+            return
+        }
+        def category = categories[index]
+        paramGroups[category].each { option ->
+            generateComb(index + 1, current + [option])
+        }
+    }
+    generateComb(0, [])
+    return combinations
+}
+
+
 
 // WORKFLOW
 workflow {
@@ -49,12 +73,17 @@ workflow {
     assess_original_qc_ch = ASSESS_ORIGINAL_GENOME_QC(qc_input_ch.map { tuple(it[0], it[1], it[5]) }) //  sample_id, genome, meryl
 
     // Hifiasm: De Novo Assemblies
-    def yaml = new YamlSlurper().parse(file(params.hifiasm))    
-    hifiasm_params_ch = channel.fromList(yaml.parameters.collect { it.set })
+    // Parse YAML + generate parameter combinations
+    def yaml = new YamlSlurper().parse(file(params.hifiasm))
+    def allComb = hifiasmParamComb(yaml)
+    // Channel wih Parameters + arguements
+    hifiasm_params_ch = channel.fromList(allComb.collect { [it.set, it.args] })
+    // Combine samples + parameter combinations
     de_novo_input_ch = samples_ch.map { tuple(it[0], it[2]) } // sample_id & hifi_reads
-        .combine(hifiasm_params_ch) // id , hifi reads , params for each
-    de_novo_ch = DE_NOVO_ASSEMBLY(de_novo_input_ch) 
-
+        .combine(hifiasm_params_ch)
+        .map { sample_id, hifi_reads, param_set, args -> tuple(sample_id, hifi_reads, param_set, args) }
+    de_novo_ch = DE_NOVO_ASSEMBLY(de_novo_input_ch)
+    
     // Hi-C Scaffolding
     // add yaml
     // hi-c_params_ch
